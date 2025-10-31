@@ -1,169 +1,81 @@
---// Credits \\--
---[[ Ezpi#0474 - Creator of this script ]]--
-
---// Services \\--
-local CoreGui = game:GetService("CoreGui")
+-- Obtener servicios
 local Players = game:GetService("Players")
-local VirtualInputManager = game:GetService("VirtualInputManager")
+local Workspace = game:GetService("Workspace")
+local player = Players.LocalPlayer
 
---// Variables \\--
-local Player = Players.LocalPlayer
-local Enabled = false
-local Mouse = Player:GetMouse()
-local X, Y = 0, 0
-local LastC = Color3.new(1, 0, 0)
-local LastU = tick()
+-- Crear UI para mostrar la lista
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
---// Exploit Fix \\--
-if not pcall(function() return syn.protect_gui end) then
-    syn = {}
-    syn.protect_gui = function(A_1)
-        A_1.Parent = CoreGui
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 400)
+frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Parent = screenGui
+
+-- Título
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0.1, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextScaled = true
+titleLabel.Text = "Carpetas en Workspace:"
+titleLabel.Parent = frame
+
+-- Botón para cerrar
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.Text = "X"
+closeButton.TextScaled = true
+closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+closeButton.Parent = frame
+
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- ScrollingFrame para la lista
+local listFrame = Instance.new("ScrollingFrame")
+listFrame.Size = UDim2.new(1, 0, 0.9, 0)
+listFrame.Position = UDim2.new(0, 0, 0.1, 0)
+listFrame.BackgroundTransparency = 1
+listFrame.ScrollBarThickness = 10
+listFrame.Parent = frame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Parent = listFrame
+
+-- Función para actualizar la lista
+local function updateFolderList()
+    -- Limpiar la lista antes de actualizar
+    for _, child in ipairs(listFrame:GetChildren()) do
+        if child:IsA("TextLabel") then
+            child:Destroy()
+        end
+    end
+
+    -- Mostrar solo las carpetas dentro de Workspace
+    for _, obj in ipairs(Workspace:GetChildren()) do
+        if obj:IsA("Folder") then
+            local folderLabel = Instance.new("TextLabel")
+            folderLabel.Size = UDim2.new(1, 0, 0, 30)
+            folderLabel.BackgroundTransparency = 1
+            folderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            folderLabel.Text = obj.Name
+            folderLabel.TextScaled = true
+            folderLabel.TextWrapped = true
+            folderLabel.Parent = listFrame
+        end
     end
 end
 
---// UI Library \\--
-local Library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))() -- Cargar librería
-local Window = Library:CreateWindow("AutoClicker by Ezpi") -- Crear ventana
+-- Actualizar la lista cada segundo
+while true do
+    updateFolderList()
+    wait(1)
+end
 
--- Estado visual
-Enabled_1 = Window:AddColor({
-    text = 'Status:',
-    flag = "Ezpi_1",
-    color = Color3.new(1, 0, 0),
-    callback = function(A_1)
-        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        if NewColor ~= LastC or A_1 ~= NewColor then
-            LastC = NewColor
-            Enabled_1:SetColor(NewColor)
-        end
-    end
-})
-
--- Botón táctil para activar/desactivar
-Window:AddButton({
-    text = "Activar/Desactivar AutoClicker",
-    callback = function()
-        Enabled = not Enabled
-
-        -- Cambiar color del estado
-        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        if NewColor ~= LastC then
-            LastC = NewColor
-            Enabled_1:SetColor(NewColor)
-        end
-
-        -- Actualizar posición del clic
-        if Enabled then
-            X, Y = Mouse.X, Mouse.Y + 10
-            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
-        else
-            X, Y = 0, 0
-            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
-        end
-
-        -- AutoClick sin bloquear UI
-        spawn(function()
-            while Enabled do
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
-                wait(Library.flags.Interval)
-            end
-        end)
-    end
-})
-
--- Slider de intervalo
-Window:AddSlider({
-    text = 'Intervalo:',
-    min = 0.01,
-    max = 2,
-    value = 1,
-    float = 0.01
-})
-
--- Posición del clic
-Box_1 = Window:AddBox({
-    text = "Posición AutoClicker:",
-    value = "X: " .. X .. ", Y: " .. Y,
-    callback = function()
-        if tick() - LastU > 0.1 then
-            LastU = tick()
-            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
-        end
-    end
-})
-
-Library:Init()
-
-
--- Estado visual
-Enabled_1 = Window:AddColor({
-    text = 'Status:',
-    flag = "Ezpi_1",
-    color = Color3.new(1, 0, 0),
-    callback = function(A_1)
-        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        if NewColor ~= Last or A_1 ~= NewColor then
-            Last = NewColor
-            Enabled_1:SetColor(NewColor)
-        end
-    end
-})
-
--- Botón táctil para activar/desactivar
-Window:AddButton({
-    text = "Activar/Desactivar AutoClicker",
-    callback = function()
-        Enabled = not Enabled
-
-        -- Cambiar color del estado
-        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        if NewColor ~= Last then
-            Last = NewColor
-            Enabled_1:SetColor(NewColor)
-        end
-
-        -- Actualizar posición del clic
-        if Enabled then
-            X, Y = Mouse.X, Mouse.Y + 10
-            Box_1:SetValue()
-        else
-            X, Y = 0, 0
-            Box_1:SetValue()
-        end
-
-        -- AutoClick sin bloquear UI
-        spawn(function()
-            while Enabled do
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
-                wait(Library.flags.Interval)
-            end
-        end)
-    end
-})
-
--- Slider de intervalo
-Window:AddSlider({
-    text = 'Interval',
-    min = 0.01,
-    max = 2,
-    value = 1,
-    float = 0.01
-})
-
--- Posición del clic
-Box_1 = Window:AddBox({
-    text = "AutoClick Position:",
-    value = "X: " .. X .. ", Y: " .. Y,
-    callback = function()
-        if tick() - LastU > 0.1 then
-            LastU = tick()
-            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
-        end
-    end
-})
-
-Library:Init()
 
