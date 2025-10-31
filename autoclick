@@ -26,7 +26,7 @@ end
 local Library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
 local Window = Library:CreateWindow("AutoClicker by Ezpi")
 
--- Status Color
+-- Estado visual
 Enabled_1 = Window:AddColor({
     text = 'Status:',
     flag = "Ezpi_1",
@@ -40,7 +40,40 @@ Enabled_1 = Window:AddColor({
     end
 })
 
--- Interval Slider
+-- Botón táctil para activar/desactivar
+Window:AddButton({
+    text = "Activar/Desactivar AutoClicker",
+    callback = function()
+        Enabled = not Enabled
+
+        -- Cambiar color del estado
+        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+        if NewColor ~= Last then
+            Last = NewColor
+            Enabled_1:SetColor(NewColor)
+        end
+
+        -- Actualizar posición del clic
+        if Enabled then
+            X, Y = Mouse.X, Mouse.Y + 10
+            Box_1:SetValue()
+        else
+            X, Y = 0, 0
+            Box_1:SetValue()
+        end
+
+        -- AutoClick sin bloquear UI
+        spawn(function()
+            while Enabled do
+                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
+                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
+                wait(Library.flags.Interval)
+            end
+        end)
+    end
+})
+
+-- Slider de intervalo
 Window:AddSlider({
     text = 'Interval',
     min = 0.01,
@@ -49,7 +82,7 @@ Window:AddSlider({
     float = 0.01
 })
 
--- AutoClick Position Box
+-- Posición del clic
 Box_1 = Window:AddBox({
     text = "AutoClick Position:",
     value = "X: " .. X .. ", Y: " .. Y,
@@ -61,35 +94,5 @@ Box_1 = Window:AddBox({
     end
 })
 
--- Toggle Button (en vez de bind de teclado)
-Window:AddButton({
-    text = "Toggle AutoClicker",
-    callback = function()
-        Enabled = not Enabled
-
-        -- Actualizar color del status
-        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        Last = NewColor
-        Enabled_1:SetColor(NewColor)
-
-        -- Click Position
-        if Enabled then
-            X, Y = Mouse.X, Mouse.Y + 10
-            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
-        else
-            X, Y = 0, 0
-            Box_1:SetValue()
-        end
-
-        -- AutoClick Loop
-        spawn(function() -- Usamos spawn para que no bloquee la UI
-            while Enabled do
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
-                wait(Library.flags.Interval)
-            end
-        end)
-    end
-})
-
 Library:Init()
+
