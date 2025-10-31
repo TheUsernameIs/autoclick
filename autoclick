@@ -1,99 +1,26 @@
---// Credits \\--
---[[ Ezpi#0474 - Creator of this script ]]--
+-- Obtén el jugador local
+local player = game.Players.LocalPlayer
 
---// Services \\--
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local VirtualInputManager = game:GetService("VirtualInputManager")
+-- Asegúrate de que el personaje del jugador esté cargado
+player.CharacterAdded:Wait()
 
---// Variables \\--
-local Player = Players.LocalPlayer
-local Enabled = false
-local Mouse = Player:GetMouse()
-local X, Y = 0, 0
-local LastC = Color3.new(1, 0, 0)
-local LastU = tick()
+-- Accede a la PlayerGui
+local playerGui = player:WaitForChild("PlayerGui")
 
---// Exploit Fix \\--
-if not pcall(function() return syn.protect_gui end) then
-    syn = {}
-    syn.protect_gui = function(A_1)
-        A_1.Parent = CoreGui
-    end
+-- Accede a la sección "Rebirth"
+local rebirth = playerGui:WaitForChild("Rebirth")
+
+-- Accede a "Content" dentro de "Rebirth"
+local content = rebirth:WaitForChild("Content")
+
+-- Ahora, accede al ImageButton "Rebirth"
+local rebirthButton = content:WaitForChild("Rebirth")
+
+-- Verifica si el ImageButton existe y simula un clic en él
+if rebirthButton and rebirthButton:IsA("ImageButton") then
+    rebirthButton.MouseButton1Click:Fire()
+else
+    warn("No se encontró el botón 'Rebirth'.")
 end
-
---// UI Library \\--
-local Library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
-local Window = Library:CreateWindow("AutoClicker by Ezpi")
-
--- Estado visual
-Enabled_1 = Window:AddColor({
-    text = 'Status:',
-    flag = "Ezpi_1",
-    color = Color3.new(1, 0, 0),
-    callback = function(A_1)
-        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        if NewColor ~= Last or A_1 ~= NewColor then
-            Last = NewColor
-            Enabled_1:SetColor(NewColor)
-        end
-    end
-})
-
--- Botón táctil para activar/desactivar
-Window:AddButton({
-    text = "Activar/Desactivar AutoClicker",
-    callback = function()
-        Enabled = not Enabled
-
-        -- Cambiar color del estado
-        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-        if NewColor ~= Last then
-            Last = NewColor
-            Enabled_1:SetColor(NewColor)
-        end
-
-        -- Actualizar posición del clic
-        if Enabled then
-            X, Y = Mouse.X, Mouse.Y + 10
-            Box_1:SetValue()
-        else
-            X, Y = 0, 0
-            Box_1:SetValue()
-        end
-
-        -- AutoClick sin bloquear UI
-        spawn(function()
-            while Enabled do
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
-                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
-                wait(Library.flags.Interval)
-            end
-        end)
-    end
-})
-
--- Slider de intervalo
-Window:AddSlider({
-    text = 'Interval',
-    min = 0.01,
-    max = 2,
-    value = 1,
-    float = 0.01
-})
-
--- Posición del clic
-Box_1 = Window:AddBox({
-    text = "AutoClick Position:",
-    value = "X: " .. X .. ", Y: " .. Y,
-    callback = function()
-        if tick() - LastU > 0.1 then
-            LastU = tick()
-            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
-        end
-    end
-})
-
-Library:Init()
 
 
