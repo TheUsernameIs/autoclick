@@ -1,0 +1,95 @@
+--// Credits \\--
+--[[ Ezpi#0474 - Creator of this script ]]--
+
+--// Services \\--
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+--// Variables \\--
+local Player = Players.LocalPlayer
+local Enabled = false
+local Mouse = Player:GetMouse()
+local X, Y = 0, 0
+local LastC = Color3.new(1, 0, 0)
+local LastU = tick()
+
+--// Exploit Fix \\--
+if not pcall(function() return syn.protect_gui end) then
+    syn = {}
+    syn.protect_gui = function(A_1)
+        A_1.Parent = CoreGui
+    end
+end
+
+--// UI Library \\--
+local Library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
+local Window = Library:CreateWindow("AutoClicker by Ezpi")
+
+-- Status Color
+Enabled_1 = Window:AddColor({
+    text = 'Status:',
+    flag = "Ezpi_1",
+    color = Color3.new(1, 0, 0),
+    callback = function(A_1)
+        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+        if NewColor ~= Last or A_1 ~= NewColor then
+            Last = NewColor
+            Enabled_1:SetColor(NewColor)
+        end
+    end
+})
+
+-- Interval Slider
+Window:AddSlider({
+    text = 'Interval',
+    min = 0.01,
+    max = 2,
+    value = 1,
+    float = 0.01
+})
+
+-- AutoClick Position Box
+Box_1 = Window:AddBox({
+    text = "AutoClick Position:",
+    value = "X: " .. X .. ", Y: " .. Y,
+    callback = function()
+        if tick() - LastU > 0.1 then
+            LastU = tick()
+            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
+        end
+    end
+})
+
+-- Toggle Button (en vez de bind de teclado)
+Window:AddButton({
+    text = "Toggle AutoClicker",
+    callback = function()
+        Enabled = not Enabled
+
+        -- Actualizar color del status
+        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+        Last = NewColor
+        Enabled_1:SetColor(NewColor)
+
+        -- Click Position
+        if Enabled then
+            X, Y = Mouse.X, Mouse.Y + 10
+            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
+        else
+            X, Y = 0, 0
+            Box_1:SetValue()
+        end
+
+        -- AutoClick Loop
+        spawn(function() -- Usamos spawn para que no bloquee la UI
+            while Enabled do
+                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
+                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
+                wait(Library.flags.Interval)
+            end
+        end)
+    end
+})
+
+Library:Init()
