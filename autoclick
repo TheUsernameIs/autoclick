@@ -1,59 +1,32 @@
--- Script del servidor (ServerScriptService)
+-- Obtener el jugador local
+local player = game.Players.LocalPlayer
 
-game.Players.PlayerAdded:Connect(function(player)
-    -- Esperamos a que el personaje cargue completamente
-    player.CharacterAdded:Connect(function(character)
-        -- Accedemos al PlayerGui del jugador
-        local playerGui = player:WaitForChild("PlayerGui")
-        
-        -- Accedemos a la carpeta "Rebirth" dentro de PlayerGui
-        local rebirthFolder = playerGui:WaitForChild("Rebirth")
-        
-        -- Accedemos a la carpeta "Content" dentro de "Rebirth"
-        local contentFolder = rebirthFolder:WaitForChild("Content")
-        
-        -- Crear un GUI para mostrar el contenido
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Parent = playerGui
-        
-        local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(0, 300, 0, 400)
-        frame.Position = UDim2.new(0.5, -150, 0.5, -200)
-        frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        frame.Parent = screenGui
-        
-        local title = Instance.new("TextLabel")
-        title.Size = UDim2.new(1, 0, 0, 30)
-        title.Text = "Contenido de 'Content':"
-        title.TextSize = 18
-        title.TextColor3 = Color3.fromRGB(0, 0, 0)
-        title.Parent = frame
-        
-        -- Crear un scrollable frame para mostrar los items dentro de Content
-        local scrollFrame = Instance.new("ScrollingFrame")
-        scrollFrame.Size = UDim2.new(1, 0, 0, 350)
-        scrollFrame.Position = UDim2.new(0, 0, 0, 30)
-        scrollFrame.CanvasSize = UDim2.new(0, 0, 10, 0) -- Haremos que el canvas se ajuste
-        scrollFrame.BackgroundTransparency = 1
-        scrollFrame.Parent = frame
-        
-        -- Crear un UIListLayout para organizar los items
-        local listLayout = Instance.new("UIListLayout")
-        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        listLayout.Parent = scrollFrame
-        
-        -- Iteramos sobre los elementos en la carpeta "Content"
-        for _, item in pairs(contentFolder:GetChildren()) do
-            local itemLabel = Instance.new("TextLabel")
-            itemLabel.Size = UDim2.new(1, 0, 0, 30)
-            itemLabel.Text = item.Name -- Mostramos el nombre del objeto
-            itemLabel.TextSize = 16
-            itemLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-            itemLabel.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
-            itemLabel.BackgroundTransparency = 0.5
-            itemLabel.Parent = scrollFrame
-        end
-    end)
-end)
+-- Acceder a PlayerGui y la jerarquía de objetos
+local playerGui = player:WaitForChild("PlayerGui")
+local screenGui = playerGui:WaitForChild("LeftCenter") -- El ScreenGui llamado "LeftCenter"
+local leftCenterFrame = screenGui:WaitForChild("LeftCenter") -- El Frame llamado "LeftCenter"
+local buttonsFrame = leftCenterFrame:WaitForChild("Buttons") -- El Frame llamado "Buttons"
+local indexButton = buttonsFrame:WaitForChild("Index") -- El ImageButton llamado "Index"
+
+-- Función para interactuar con el ImageButton
+local function interactuarConBoton()
+    -- Verificar que el botón 'Index' está disponible
+    if indexButton then
+        -- Simular el clic en el botón (esto podría activar cualquier evento conectado al botón)
+        indexButton.MouseButton1Click:Fire()
+
+        -- O hacer lo que desees cuando se "interactúa" con el botón
+        print("Se ha interactuado con el botón 'Index'.")
+
+        -- También puedes cambiar propiedades del botón si es necesario
+        indexButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Ejemplo: Cambiar el color del botón a rojo
+    else
+        print("El botón 'Index' no se encuentra.")
+    end
+end
+
+-- Ejecutar la función de interacción
+interactuarConBoton()
+
 
 
