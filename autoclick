@@ -1,26 +1,82 @@
--- Obtén el jugador local
+-- Crear una función para mostrar mensajes en la UI
+local function crearUI()
+    -- Crear un ScreenGui para contener los elementos
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+    -- Crear un TextLabel para mostrar la ruta
+    local rutaLabel = Instance.new("TextLabel")
+    rutaLabel.Parent = screenGui
+    rutaLabel.Position = UDim2.new(0.5, -200, 0.5, -100) -- Centrado en la pantalla
+    rutaLabel.Size = UDim2.new(0, 400, 0, 200)
+    rutaLabel.BackgroundTransparency = 0.5
+    rutaLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    rutaLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    rutaLabel.TextSize = 18
+    rutaLabel.TextWrapped = true
+    rutaLabel.Text = "Iniciando recorrido..."
+
+    return rutaLabel
+end
+
+-- Obtener el jugador local
 local player = game.Players.LocalPlayer
 
--- Asegúrate de que el personaje del jugador esté cargado
+-- Esperar a que el personaje esté cargado
 player.CharacterAdded:Wait()
 
--- Accede a la PlayerGui
+-- Crear el UI para mostrar la ruta
+local rutaLabel = crearUI()
+
+-- Acceder a la jerarquía del personaje
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Accede a la sección "Rebirth"
-local rebirth = playerGui:WaitForChild("Rebirth")
+-- Función para actualizar el texto de la ruta
+local function actualizarRuta(mensaje)
+    rutaLabel.Text = rutaLabel.Text .. "\n" .. mensaje
+end
 
--- Accede a "Content" dentro de "Rebirth"
-local content = rebirth:WaitForChild("Content")
+-- Iniciar la búsqueda
+local encontrado = false
 
--- Ahora, accede al ImageButton "Rebirth"
-local rebirthButton = content:WaitForChild("Rebirth")
+-- Acceder a PlayerGui -> Rebirth -> Content -> ImageButton "Rebirth"
+local function buscarRebirth()
+    -- Acceder a PlayerGui
+    actualizarRuta("Accediendo a PlayerGui...")
+    local rebirthGui = playerGui:WaitForChild("Rebirth", 5)
+    if rebirthGui then
+        actualizarRuta("Rebirth encontrado.")
+        
+        -- Acceder a Content
+        local content = rebirthGui:WaitForChild("Content", 5)
+        if content then
+            actualizarRuta("Content encontrado.")
+            
+            -- Acceder al ImageButton "Rebirth"
+            local rebirthButton = content:WaitForChild("Rebirth", 5)
+            if rebirthButton and rebirthButton:IsA("ImageButton") then
+                actualizarRuta("Botón Rebirth encontrado.")
+                rebirthButton.MouseButton1Click:Fire() -- Simula el clic
+                encontrado = true
+            else
+                actualizarRuta("No se encontró el botón 'Rebirth'.")
+            end
+        else
+            actualizarRuta("No se encontró 'Content'.")
+        end
+    else
+        actualizarRuta("No se encontró 'Rebirth' en PlayerGui.")
+    end
+end
 
--- Verifica si el ImageButton existe y simula un clic en él
-if rebirthButton and rebirthButton:IsA("ImageButton") then
-    rebirthButton.MouseButton1Click:Fire()
+-- Ejecutar la búsqueda
+buscarRebirth()
+
+-- Mostrar el resultado final
+if encontrado then
+    actualizarRuta("¡Éxito! El botón fue clickeado.")
 else
-    warn("No se encontró el botón 'Rebirth'.")
+    actualizarRuta("No se encontró el botón o hubo un error.")
 end
 
 
