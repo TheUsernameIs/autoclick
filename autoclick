@@ -1,82 +1,59 @@
--- Crear una función para mostrar mensajes en la UI
-local function crearUI()
-    -- Crear un ScreenGui para contener los elementos
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = game.Players.LocalPlayer.PlayerGui
+-- Script del servidor (ServerScriptService)
 
-    -- Crear un TextLabel para mostrar la ruta
-    local rutaLabel = Instance.new("TextLabel")
-    rutaLabel.Parent = screenGui
-    rutaLabel.Position = UDim2.new(0.5, -200, 0.5, -100) -- Centrado en la pantalla
-    rutaLabel.Size = UDim2.new(0, 400, 0, 200)
-    rutaLabel.BackgroundTransparency = 0.5
-    rutaLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    rutaLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    rutaLabel.TextSize = 18
-    rutaLabel.TextWrapped = true
-    rutaLabel.Text = "Iniciando recorrido..."
-
-    return rutaLabel
-end
-
--- Obtener el jugador local
-local player = game.Players.LocalPlayer
-
--- Esperar a que el personaje esté cargado
-player.CharacterAdded:Wait()
-
--- Crear el UI para mostrar la ruta
-local rutaLabel = crearUI()
-
--- Acceder a la jerarquía del personaje
-local playerGui = player:WaitForChild("PlayerGui")
-
--- Función para actualizar el texto de la ruta
-local function actualizarRuta(mensaje)
-    rutaLabel.Text = rutaLabel.Text .. "\n" .. mensaje
-end
-
--- Iniciar la búsqueda
-local encontrado = false
-
--- Acceder a PlayerGui -> Rebirth -> Content -> ImageButton "Rebirth"
-local function buscarRebirth()
-    -- Acceder a PlayerGui
-    actualizarRuta("Accediendo a PlayerGui...")
-    local rebirthGui = playerGui:WaitForChild("Rebirth", 5)
-    if rebirthGui then
-        actualizarRuta("Rebirth encontrado.")
+game.Players.PlayerAdded:Connect(function(player)
+    -- Esperamos a que el personaje cargue completamente
+    player.CharacterAdded:Connect(function(character)
+        -- Accedemos al PlayerGui del jugador
+        local playerGui = player:WaitForChild("PlayerGui")
         
-        -- Acceder a Content
-        local content = rebirthGui:WaitForChild("Content", 5)
-        if content then
-            actualizarRuta("Content encontrado.")
-            
-            -- Acceder al ImageButton "Rebirth"
-            local rebirthButton = content:WaitForChild("Rebirth", 5)
-            if rebirthButton and rebirthButton:IsA("ImageButton") then
-                actualizarRuta("Botón Rebirth encontrado.")
-                rebirthButton.MouseButton1Click:Fire() -- Simula el clic
-                encontrado = true
-            else
-                actualizarRuta("No se encontró el botón 'Rebirth'.")
-            end
-        else
-            actualizarRuta("No se encontró 'Content'.")
+        -- Accedemos a la carpeta "Rebirth" dentro de PlayerGui
+        local rebirthFolder = playerGui:WaitForChild("Rebirth")
+        
+        -- Accedemos a la carpeta "Content" dentro de "Rebirth"
+        local contentFolder = rebirthFolder:WaitForChild("Content")
+        
+        -- Crear un GUI para mostrar el contenido
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Parent = playerGui
+        
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(0, 300, 0, 400)
+        frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+        frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        frame.Parent = screenGui
+        
+        local title = Instance.new("TextLabel")
+        title.Size = UDim2.new(1, 0, 0, 30)
+        title.Text = "Contenido de 'Content':"
+        title.TextSize = 18
+        title.TextColor3 = Color3.fromRGB(0, 0, 0)
+        title.Parent = frame
+        
+        -- Crear un scrollable frame para mostrar los items dentro de Content
+        local scrollFrame = Instance.new("ScrollingFrame")
+        scrollFrame.Size = UDim2.new(1, 0, 0, 350)
+        scrollFrame.Position = UDim2.new(0, 0, 0, 30)
+        scrollFrame.CanvasSize = UDim2.new(0, 0, 10, 0) -- Haremos que el canvas se ajuste
+        scrollFrame.BackgroundTransparency = 1
+        scrollFrame.Parent = frame
+        
+        -- Crear un UIListLayout para organizar los items
+        local listLayout = Instance.new("UIListLayout")
+        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        listLayout.Parent = scrollFrame
+        
+        -- Iteramos sobre los elementos en la carpeta "Content"
+        for _, item in pairs(contentFolder:GetChildren()) do
+            local itemLabel = Instance.new("TextLabel")
+            itemLabel.Size = UDim2.new(1, 0, 0, 30)
+            itemLabel.Text = item.Name -- Mostramos el nombre del objeto
+            itemLabel.TextSize = 16
+            itemLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+            itemLabel.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+            itemLabel.BackgroundTransparency = 0.5
+            itemLabel.Parent = scrollFrame
         end
-    else
-        actualizarRuta("No se encontró 'Rebirth' en PlayerGui.")
-    end
-end
-
--- Ejecutar la búsqueda
-buscarRebirth()
-
--- Mostrar el resultado final
-if encontrado then
-    actualizarRuta("¡Éxito! El botón fue clickeado.")
-else
-    actualizarRuta("No se encontró el botón o hubo un error.")
-end
+    end)
+end)
 
 
