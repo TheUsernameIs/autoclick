@@ -23,8 +23,79 @@ if not pcall(function() return syn.protect_gui end) then
 end
 
 --// UI Library \\--
-local Library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))()
-local Window = Library:CreateWindow("AutoClicker by Ezpi")
+local Library = loadstring(game:HttpGetAsync('https://pastebin.com/raw/edJT9EGX'))() -- Cargar librería
+local Window = Library:CreateWindow("AutoClicker by Ezpi") -- Crear ventana
+
+-- Estado visual
+Enabled_1 = Window:AddColor({
+    text = 'Status:',
+    flag = "Ezpi_1",
+    color = Color3.new(1, 0, 0),
+    callback = function(A_1)
+        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+        if NewColor ~= LastC or A_1 ~= NewColor then
+            LastC = NewColor
+            Enabled_1:SetColor(NewColor)
+        end
+    end
+})
+
+-- Botón táctil para activar/desactivar
+Window:AddButton({
+    text = "Activar/Desactivar AutoClicker",
+    callback = function()
+        Enabled = not Enabled
+
+        -- Cambiar color del estado
+        local NewColor = Enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+        if NewColor ~= LastC then
+            LastC = NewColor
+            Enabled_1:SetColor(NewColor)
+        end
+
+        -- Actualizar posición del clic
+        if Enabled then
+            X, Y = Mouse.X, Mouse.Y + 10
+            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
+        else
+            X, Y = 0, 0
+            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
+        end
+
+        -- AutoClick sin bloquear UI
+        spawn(function()
+            while Enabled do
+                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, true, game, 1)
+                VirtualInputManager:SendMouseButtonEvent(X, Y, 0, false, game, 1)
+                wait(Library.flags.Interval)
+            end
+        end)
+    end
+})
+
+-- Slider de intervalo
+Window:AddSlider({
+    text = 'Intervalo:',
+    min = 0.01,
+    max = 2,
+    value = 1,
+    float = 0.01
+})
+
+-- Posición del clic
+Box_1 = Window:AddBox({
+    text = "Posición AutoClicker:",
+    value = "X: " .. X .. ", Y: " .. Y,
+    callback = function()
+        if tick() - LastU > 0.1 then
+            LastU = tick()
+            Box_1:SetValue("X: " .. X .. ", Y: " .. Y)
+        end
+    end
+})
+
+Library:Init()
+
 
 -- Estado visual
 Enabled_1 = Window:AddColor({
